@@ -59,6 +59,7 @@ hw_info *get_system_bsd();    // Get system information
 OSHash *gateways;
 
 char* sys_parse_pkg(const char * app_folder, const char * timestamp, int random_id);
+static bool sys_convert_bin_plist(FILE **fp, char **magic_bytes, char *filepath);
 
 // Get installed programs inventory
 
@@ -439,6 +440,7 @@ char* sys_parse_pkg(const char * app_folder, const char * timestamp, int random_
  **/
 bool sys_convert_bin_plist(FILE **fp, char **magic_bytes, char *filepath) {
     char * bin = NULL;
+    char * xml = NULL;
     struct stat filestats = {0};
     int fd = fileno(*fp);
     bool status = false;
@@ -463,7 +465,7 @@ bool sys_convert_bin_plist(FILE **fp, char **magic_bytes, char *filepath) {
         goto clean;
     }
 
-    fpclose(*fp);
+    fclose(*fp);
 
     if (*fp = tmpfile(), *fp == NULL) {
         mterror(WM_SYS_LOGTAG, "Failed to open tmpfile: %s", strerror(errno));
@@ -472,7 +474,7 @@ bool sys_convert_bin_plist(FILE **fp, char **magic_bytes, char *filepath) {
 
     fwrite(xml, size, sizeof(char), *fp);
     fseek(*fp, 0, SEEK_SET);
-    fgets(*magic_bytes, OS_MAXSTR - 1, fp); // Hopefully the expected XML format.
+    fgets(*magic_bytes, OS_MAXSTR - 1, *fp); // Hopefully the expected XML format.
 
     status = true;
 
